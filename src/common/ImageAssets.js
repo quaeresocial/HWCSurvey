@@ -1,0 +1,16 @@
+export default {
+  logo:require('./../../assets/images/logo.png'),
+  down:require('./../../assets/images/down.png'),
+  edit:require('./../../assets/images/edit.png'),
+  filter:require('./../../assets/images/filter.png'),
+  logout:require('./../../assets/images/logout.png'),
+  empty:require('./../../assets/images/empty.png'),
+  left:require('./../../assets/images/left.png'),
+  fill:require('./../../assets/images/fill.png'),
+  pin:require('./../../assets/images/pin.png'),
+  camera:require('./../../assets/images/camera.png'),
+  gallery:require('./../../assets/images/gallery.png'),
+  exit:require('./../../assets/images/exit.png'),
+  uploadicon:require('./../../assets/images/uploadicon.png'),
+  key:require('./../../assets/images/key.png'),
+};
