@@ -43,6 +43,7 @@ const EditFacility = props => {
   const [noofschool, setNoofschool] = useState('');
   const [eligiblecouple, setEligibleCouple] = useState('');
   const [pregnentwomen, setPregnentwomen] = useState('');
+  const [dailyAvgOPD, setDailyAvgOPD] = useState('');
   const [zerotoone, setZerotoone] = useState('');
   const [active, setActive] = useState(false);
   const [filePicker1, setFilePicker1] = useState(false);
@@ -75,6 +76,7 @@ const EditFacility = props => {
 
   const [aamId, setAamId] = useState(0);
   const [aamName, setAamName] = useState('');  
+  const [isScAam, setIsScAam] = useState(data?.SCType === "SC-AAM"?true:false);
 
   useEffect(() => {
     HwcSourceList();
@@ -90,6 +92,7 @@ const EditFacility = props => {
       async res => {
         console.log(res, '======>>>Service Detail Api Response');
         if (res?.response === 'success') {
+          console.log("res?.isScAam---------------", res?.isSCAam)
           setData(res);
           setHwcId(res?.Fk_HWCSourceId);
           setImageUrl1(res?.Image1);
@@ -111,9 +114,11 @@ const EditFacility = props => {
           setVillagename(res?.VillageName);
           allGramPanchayat(res?.FK_BlockID);
           setServiceList(res?.HWCSeriveTypeList);
+          setDailyAvgOPD(res?.DailyAverageOPD)
           setNin(res?.NIN);
           setAamId(res?.Fk_AamType)
           setAamName(res?.TypeName)
+          setIsScAam(res?.SCType == "SC-AAM" ? true : false)
           const foundData = res?.HWCSeriveTypeList.find(
             item => item?.Pk_ServiceId === 2,
           );
@@ -296,6 +301,8 @@ const EditFacility = props => {
       NIN: nin,
       Fk_HWCSourceId: hwcid,
       Fk_AamType:aamId,
+      SCType:isScAam ? "SC-AAM" : "SC",
+      DailyAverageOPD:dailyAvgOPD,
     };
 
     console.log(param, '=======================>>>>');
@@ -449,20 +456,8 @@ const EditFacility = props => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {active && (
           <>
-            <View style={{paddingVertical: 10, width: width - 30}}>
-
-             
-              <CustomDropDown
-                inputTitle={'Facility Name'}
-                value={data?.FacilityName}
-                container_style={{backgroundColor: Colors.lightGrey}}
-              />
-              <CustomDropDown
-                inputTitle={'Facility Type'}
-                value={data?.FacilityType}
-                container_style={{backgroundColor: Colors.lightGrey}}
-              />
-              <View
+            <View style={{paddingVertical: 10, width: width - 30}}>    
+             <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -522,22 +517,77 @@ const EditFacility = props => {
                 inputTitle={'Village'}
                 value={villagename ? villagename : 'Select Village'}
                 righticon={ImageAssets.down}
-              />
-              
+              />         
+              <Text
+                style={[
+                  font_style.text_14_700,
+                  {color: Colors.black, paddingBottom: 6},
+                ]}>
+                {'Type of facility'}
+              </Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <MyRadioButton
+                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  text={'SC-AAM'}
+                  onPress={() => setIsScAam(true)}
+                  isChecked={isScAam}
+                />
+                <MyRadioButton
+                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  text={'Only SC'}
+                  onPress={() => setIsScAam(false)}
+                  isChecked={!isScAam}
+                />
+              </View>
               <CustomDropDown
+                inputTitle={'Facility Name'}
+                value={data?.FacilityName}
+                container_style={{backgroundColor: Colors.lightGrey}}
+              />
+               <CustomInput
+                inputTitle={'NIN'}
+                container_style={{width: '100%'}}
+                keyboardType={KeyBoardType.number_pad}
+                value={nin}
+                onValue={val => setNin(val)}
+                maxLength={15}
+              />
+               <CustomDropDown
+                inputTitle={'Facility Code'}
+                value={data?.FacilityCode}
+                container_style={{backgroundColor: Colors.lightGrey}}
+              />
+              <CustomDropDown
+                inputTitle={'Facility Type'}
+                value={data?.FacilityType}
+                container_style={{backgroundColor: Colors.lightGrey}}
+              />    
+               <CustomDropDown
                 required={' *'}
                 onPress={() => setShowAam(true)}
                 inputTitle={'Type of AAM Infrastructure/Building '}
                 value={aamName ? aamName : 'Please select'}
                 righticon={ImageAssets.down}
-              />
-            
-                <View style={{paddingVertical: 10}}>
+              />  
+                <Text
+                style={[
+                  font_style.text_14_700,
+                  {color: Colors.black, paddingBottom: 6},
+                ]}>
+                {'Is CHO Posted'}
+              </Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <MyRadioButton
                   textStyle={[font_style.text_14_600, {color: Colors.black}]}
-                  text={'if CHO posted '}
-                  onPress={() => setFundRecieved(!fundrecieved)}
+                  text={'Yes'}
+                  onPress={() => setFundRecieved(true)}
                   isChecked={fundrecieved}
+                />
+                <MyRadioButton
+                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  text={'No'}
+                  onPress={() => setFundRecieved(false)}
+                  isChecked={!fundrecieved}
                 />
               </View>
              {fundrecieved && <CustomInput
@@ -604,6 +654,13 @@ const EditFacility = props => {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}>
+                   <CustomInput
+                  inputTitle={'No of AWW'}
+                  container_style={{width: width / 2 - 20}}
+                  keyboardType={KeyBoardType.number_pad}
+                  value={eligiblecouple}
+                  onValue={val => setEligibleCouple(val)}
+                />
                 <CustomInput
                   inputTitle={'No. of Schools'}
                   container_style={{width: width / 2 - 20}}
@@ -612,13 +669,7 @@ const EditFacility = props => {
                   onValue={val => setNoofschool(val)}
                 />
 
-                <CustomInput
-                  inputTitle={'No of AWW'}
-                  container_style={{width: width / 2 - 20}}
-                  keyboardType={KeyBoardType.number_pad}
-                  value={eligiblecouple}
-                  onValue={val => setEligibleCouple(val)}
-                />
+               
               </View>
               <CustomInput
                 inputTitle={'No of Diagnostic Test Available'}
@@ -636,14 +687,7 @@ const EditFacility = props => {
                 onValue={val => setZerotoone(val)}
               />
               {/* </View> */}
-              <CustomInput
-                inputTitle={'NIN'}
-                container_style={{width: '100%'}}
-                keyboardType={KeyBoardType.number_pad}
-                value={nin}
-                onValue={val => setNin(val)}
-                maxLength={15}
-              />
+             
             
               <Text
                 style={[
@@ -669,6 +713,13 @@ const EditFacility = props => {
                 righticon={ImageAssets.down}
               />
             )}
+             <CustomInput
+                inputTitle={'Daily Average OPD'}
+                container_style={{width: '100%'}}
+                keyboardType={KeyBoardType.number_pad}
+                value={dailyAvgOPD}
+                onValue={val => setDailyAvgOPD(val)}
+              />
             {/* <Text
               style={[
                 font_style.text_14_700,
