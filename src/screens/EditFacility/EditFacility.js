@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, Text, View } from 'react-native';
+import { Alert, Dimensions, ScrollView, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Container from '../../common/Container';
 import ImageAssets from '../../common/ImageAssets';
@@ -320,11 +320,22 @@ const EditFacility = props => {
       async res => {
         console.log(res, '======>>>Update Service Detail Api Response');
         if (res?.response === 'success') {
-          showToast('Facility update successfully');
-          props.navigation.reset({
-            index: 0,
-            routes: [{ name: 'Dashboard' }],
-          });
+          Alert.alert(
+            'Facility updated successfully', // Title or message
+            '', // Optional message (you can leave it empty)
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  props.navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Dashboard' }],
+                  });
+                },
+              },
+            ]
+          );
+          
           dispatch(setLoading(false));
         } else {
           showToast(res?.message);
