@@ -55,10 +55,20 @@ export function isValidName(name) {
   return re.test(name)
 }
 
-export function isValidIndianMobileNumber (number) {
-  const re = /^[6789]\d{9}$/
-  return re.test(number)
+export function isValidIndianMobileNumber(number) {
+  // Remove spaces and country code if present
+  const cleaned = number.trim().replace(/^(\+91[\-\s]?|0)/, '');
+
+  // Must start with 6, 7, 8, or 9 and be exactly 10 digits
+  const re = /^[6789]\d{9}$/;
+
+  // Reject numbers with all identical digits (e.g., 9999999999)
+  const allSameDigits = /^(\d)\1{9}$/;
+
+  return re.test(cleaned) && !allSameDigits.test(cleaned);
 }
+
+
 
 export function openUrl (url) {
   Linking.canOpenURL(url).then(

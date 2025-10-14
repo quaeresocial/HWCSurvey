@@ -1,18 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, Text, View} from 'react-native';
-import {useDispatch} from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, ScrollView, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 import Container from '../../common/Container';
 import ImageAssets from '../../common/ImageAssets';
 import HeaderBar from '../../coomon_component/headerBar';
 import CustomDropDown from '../../coomon_component/CustomDropDown';
 import KeyBoardType from '../../common/KeyBoardType';
 import CustomInput from '../../coomon_component/CustomInput';
-import {font_style} from '../../common/MyStyles';
+import { font_style } from '../../common/MyStyles';
 import Colors from '../../common/Colors';
 import MyRadioButton from '../../coomon_component/RadioButton';
 // import Geolocation from '@react-native-community/geolocation'
 import CustomUpload from '../../coomon_component/CustomUpload';
-import {MyImageFilePicker} from '../../coomon_component/MyImageFilePicker';
+import { MyImageFilePicker } from '../../coomon_component/MyImageFilePicker';
 import MyButton from '../../coomon_component/MyButton';
 import {
   isEmpty,
@@ -20,7 +20,7 @@ import {
   isValidName,
   showToast,
 } from '../../common/common';
-import {setLoading} from '../../redux_store/actions/indexActions';
+import { setLoading } from '../../redux_store/actions/indexActions';
 import {
   GetAamTypeAPI,
   HwcSourceListApi,
@@ -75,8 +75,9 @@ const EditFacility = props => {
   const [selecetd, setSelecetd] = useState('');
 
   const [aamId, setAamId] = useState(0);
-  const [aamName, setAamName] = useState('');  
-  const [isScAam, setIsScAam] = useState(data?.SCType === "SC-AAM"?true:false);
+  const [aamName, setAamName] = useState('');
+  const [scType, setScType] = useState(data?.SCType);
+  const [choType, setChoType] = useState(data?.IsCHO);
 
   useEffect(() => {
     HwcSourceList();
@@ -85,7 +86,7 @@ const EditFacility = props => {
   }, []);
 
   const allDetailData = () => {
-    let param = {Fk_FacilityId: value?.FK_FacilityCode};
+    let param = { Fk_FacilityId: value?.FK_FacilityCode };
     dispatch(setLoading(true));
     serviceDetail(
       param,
@@ -118,7 +119,8 @@ const EditFacility = props => {
           setNin(res?.NIN);
           setAamId(res?.Fk_AamType)
           setAamName(res?.TypeName)
-          setIsScAam(res?.SCType == "SC-AAM" ? true : false)
+          setScType(res?.SCType)
+          setChoType(res?.IsCHO)
           const foundData = res?.HWCSeriveTypeList.find(
             item => item?.Pk_ServiceId === 2,
           );
@@ -162,11 +164,11 @@ const EditFacility = props => {
     );
   };
 
-   const GetAamTypeList = name => {
+  const GetAamTypeList = name => {
     GetAamTypeAPI(
       async res => {
         if (res?.response === 'success') {
-          console.log("aam----------------->",res);
+          console.log("aam----------------->", res);
           setAamList(res?.AamTypeLists);
           dispatch(setLoading(false));
         } else {
@@ -193,40 +195,44 @@ const EditFacility = props => {
   }, [hwcid]);
 
   const handleUpdate = () => {
-     if (!isValidName(aamName)) {
-      showToast('Select Type Of AAM Infrastructure');
+     if (scType == "" || scType == null) {
+      showToast('Select Type Of Facility');
     }else
-    if (!isValidName(choname) && fundrecieved) {
-      showToast('Enter CHO Name');
-    } else if (!isValidIndianMobileNumber(chomobile)&& fundrecieved) {
-      showToast('Enter valid CHO mobile number');
-    } else if (!isValidName(anmname)) {
-      showToast('Enter ANM Name');
-    } else if (!isValidIndianMobileNumber(anmmobile)) {
-      showToast('Enter valid ANM mobile number');
-    } else if (isEmpty(village)) {
-      showToast('Select Village');
-    } else if (isEmpty(totalpopulation)) {
-      showToast('Enter total population');
-    } else if (isEmpty(anm)) {
-      showToast('Enter Asha Count');
-    } else if (isEmpty(noofschool)) {
-      showToast('Enter no. of School');
-    } else if (isEmpty(eligiblecouple)) {
-      showToast('Enter AWW');
-    } else if (isEmpty(pregnentwomen)) {
-      showToast('Enter Diagnostic Test Available');
-    } else if (isEmpty(zerotoone)) {
-      showToast('No. of Medicine Available');
-    } else if (isEmpty(nin)) {
-      showToast('Enter NIN');
-    } else if (/^0+$/.test(nin)) {
-      showToast('NIN cannot be zeros');
-    } else if (!/^[0-9]\d{9,14}$/.test(nin)) {
-      showToast('NIN must be between 10 and 15 digits');
-    } else {
-      handleValidation();
-    }
+    if (!isValidName(aamName)) {
+      showToast('Select Type Of AAM Infrastructure');
+    } else if (choType == "" || choType == null) {
+      showToast('Select Is CHO Posted');
+    } else if (!isValidName(choname) && choType === "Yes") {
+        showToast('Enter CHO Name');
+      } else if (!isValidIndianMobileNumber(chomobile) && choType === "Yes") {
+        showToast('Enter valid CHO mobile number');
+      } else if (!isValidName(anmname)) {
+        showToast('Enter ANM Name');
+      } else if (!isValidIndianMobileNumber(anmmobile)) {
+        showToast('Enter valid ANM mobile number');
+      } else if (isEmpty(village)) {
+        showToast('Select Village');
+      } else if (isEmpty(totalpopulation)) {
+        showToast('Enter total population');
+      } else if (isEmpty(anm)) {
+        showToast('Enter Asha Count');
+      } else if (isEmpty(noofschool)) {
+        showToast('Enter no. of School');
+      } else if (isEmpty(eligiblecouple)) {
+        showToast('Enter AWW');
+      } else if (isEmpty(pregnentwomen)) {
+        showToast('Enter Diagnostic Test Available');
+      } else if (isEmpty(zerotoone)) {
+        showToast('No. of Medicine Available');
+      } else if (isEmpty(nin)) {
+        showToast('Enter NIN');
+      } else if (/^0+$/.test(nin)) {
+        showToast('NIN cannot be zeros');
+      } else if (!/^[0-9]\d{9,14}$/.test(nin)) {
+        showToast('NIN must be between 10 and 15 digits');
+      } else {
+        handleValidation();
+      }
   };
 
   const validateCheckedServices = () => {
@@ -264,7 +270,7 @@ const EditFacility = props => {
     // } else if (isEmpty(imageurl2)) {
     //   showToast('Please upload image service delivery');
     // } else {
-      imageValidate();
+    imageValidate();
     // }
   };
 
@@ -300,9 +306,10 @@ const EditFacility = props => {
       hWCSeriveTypes: data,
       NIN: nin,
       Fk_HWCSourceId: hwcid,
-      Fk_AamType:aamId,
-      SCType:isScAam ? "SC-AAM" : "SC",
-      DailyAverageOPD:dailyAvgOPD,
+      Fk_AamType: aamId,
+      SCType: scType,
+      DailyAverageOPD: dailyAvgOPD,
+      IsCHO: choType,
     };
 
     console.log(param, '=======================>>>>');
@@ -316,7 +323,7 @@ const EditFacility = props => {
           showToast('Facility update successfully');
           props.navigation.reset({
             index: 0,
-            routes: [{name: 'Dashboard'}],
+            routes: [{ name: 'Dashboard' }],
           });
           dispatch(setLoading(false));
         } else {
@@ -333,7 +340,7 @@ const EditFacility = props => {
   };
 
   const allGramPanchayat = id => {
-    let param = {BlockID: id};
+    let param = { BlockID: id };
     allGrampanchayat(
       param,
       async res => {
@@ -355,7 +362,7 @@ const EditFacility = props => {
   };
 
   const allVillage = id => {
-    let param = {GramPanchayatId: id};
+    let param = { GramPanchayatId: id };
     dispatch(setLoading(true));
     allVillageApi(
       param,
@@ -432,7 +439,7 @@ const EditFacility = props => {
   const handleService = value => {
     const updatedServices = servicelist.map(item =>
       item.Pk_ServiceId === value?.Pk_ServiceId
-        ? {...item, Ischecked: item.Ischecked === 0 ? 1 : 0}
+        ? { ...item, Ischecked: item.Ischecked === 0 ? 1 : 0 }
         : item,
     );
     setServiceList(updatedServices);
@@ -456,8 +463,8 @@ const EditFacility = props => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {active && (
           <>
-            <View style={{paddingVertical: 10, width: width - 30}}>    
-             <View
+            <View style={{ paddingVertical: 10, width: width - 30 }}>
+              <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -517,100 +524,100 @@ const EditFacility = props => {
                 inputTitle={'Village'}
                 value={villagename ? villagename : 'Select Village'}
                 righticon={ImageAssets.down}
-              />         
+              />
               <Text
                 style={[
                   font_style.text_14_700,
-                  {color: Colors.black, paddingBottom: 6},
+                  { color: Colors.black, paddingBottom: 6 },
                 ]}>
                 {'Type of facility'}
               </Text>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MyRadioButton
-                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  textStyle={[font_style.text_14_600, { color: Colors.black }]}
                   text={'SC-AAM'}
-                  onPress={() => setIsScAam(true)}
-                  isChecked={isScAam}
+                  onPress={() => setScType('SC-AAM')}
+                  isChecked={scType === 'SC-AAM'}
                 />
                 <MyRadioButton
-                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  textStyle={[font_style.text_14_600, { color: Colors.black }]}
                   text={'Only SC'}
-                  onPress={() => setIsScAam(false)}
-                  isChecked={!isScAam}
+                  onPress={() => setScType('SC')}
+                  isChecked={scType === 'SC'}
                 />
               </View>
               <CustomDropDown
                 inputTitle={'Facility Name'}
                 value={data?.FacilityName}
-                container_style={{backgroundColor: Colors.lightGrey}}
+                container_style={{ backgroundColor: Colors.lightGrey }}
               />
-               <CustomInput
+              <CustomInput
                 inputTitle={'NIN'}
-                container_style={{width: '100%'}}
+                container_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={nin}
                 onValue={val => setNin(val)}
                 maxLength={15}
               />
-               <CustomDropDown
+              <CustomDropDown
                 inputTitle={'Facility Code'}
                 value={data?.FacilityCode}
-                container_style={{backgroundColor: Colors.lightGrey}}
+                container_style={{ backgroundColor: Colors.lightGrey }}
               />
               <CustomDropDown
                 inputTitle={'Facility Type'}
                 value={data?.FacilityType}
-                container_style={{backgroundColor: Colors.lightGrey}}
-              />    
-               <CustomDropDown
+                container_style={{ backgroundColor: Colors.lightGrey }}
+              />
+              <CustomDropDown
                 required={' *'}
                 onPress={() => setShowAam(true)}
                 inputTitle={'Type of AAM Infrastructure/Building '}
                 value={aamName ? aamName : 'Please select'}
                 righticon={ImageAssets.down}
-              />  
-                <Text
+              />
+              <Text
                 style={[
                   font_style.text_14_700,
-                  {color: Colors.black, paddingBottom: 6},
+                  { color: Colors.black, paddingBottom: 6 },
                 ]}>
                 {'Is CHO Posted'}
               </Text>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MyRadioButton
-                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  textStyle={[font_style.text_14_600, { color: Colors.black }]}
                   text={'Yes'}
-                  onPress={() => setFundRecieved(true)}
-                  isChecked={fundrecieved}
+                  onPress={() => setChoType("Yes")}
+                  isChecked={choType === "Yes"}
                 />
                 <MyRadioButton
-                  textStyle={[font_style.text_14_600, {color: Colors.black}]}
+                  textStyle={[font_style.text_14_600, { color: Colors.black }]}
                   text={'No'}
-                  onPress={() => setFundRecieved(false)}
-                  isChecked={!fundrecieved}
+                  onPress={() => setChoType("No")}
+                  isChecked={choType === "No"}
                 />
               </View>
-             {fundrecieved && <CustomInput
+              {choType === "Yes" && <CustomInput
                 inputTitle={'Community Health Officer Name'}
-                ontainer_style={{width: '100%'}}
+                ontainer_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.default}
                 value={choname}
                 onValue={val => {
                   const regex = val.replace(/[^a-zA-Z]/g, '');
                   setChoName(regex);
                 }}
-              /> }
-               {fundrecieved && <CustomInput
+              />}
+              {choType === "Yes" && <CustomInput
                 inputTitle={'Community Health Officer Mobile'}
-                ontainer_style={{width: '100%'}}
+                ontainer_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={chomobile}
                 onValue={val => setChoMobile(val)}
                 maxLength={10}
               />}
-               <CustomInput
+              <CustomInput
                 inputTitle={'ANM Name'}
-                ontainer_style={{width: '100%'}}
+                ontainer_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.default}
                 value={anmname}
                 onValue={val => {
@@ -620,7 +627,7 @@ const EditFacility = props => {
               />
               <CustomInput
                 inputTitle={'ANM Mobile'}
-                ontainer_style={{width: '100%'}}
+                ontainer_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={anmmobile}
                 onValue={val => setAnmMobile(val)}
@@ -634,7 +641,7 @@ const EditFacility = props => {
                 }}>
                 <CustomInput
                   inputTitle={'Total Population'}
-                  container_style={{width: width / 2 - 20}}
+                  container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={totalpopulation}
                   onValue={val => setTotalPopulation(val)}
@@ -642,7 +649,7 @@ const EditFacility = props => {
 
                 <CustomInput
                   inputTitle={'No of ASHA'}
-                  container_style={{width: width / 2 - 20}}
+                  container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={anm}
                   onValue={val => setAnm(val)}
@@ -654,26 +661,26 @@ const EditFacility = props => {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}>
-                   <CustomInput
+                <CustomInput
                   inputTitle={'No of AWW'}
-                  container_style={{width: width / 2 - 20}}
+                  container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={eligiblecouple}
                   onValue={val => setEligibleCouple(val)}
                 />
                 <CustomInput
                   inputTitle={'No. of Schools'}
-                  container_style={{width: width / 2 - 20}}
+                  container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={noofschool}
                   onValue={val => setNoofschool(val)}
                 />
 
-               
+
               </View>
               <CustomInput
                 inputTitle={'No of Diagnostic Test Available'}
-                container_style={{width: '100%'}}
+                container_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={pregnentwomen}
                 onValue={val => setPregnentwomen(val)}
@@ -681,21 +688,21 @@ const EditFacility = props => {
 
               <CustomInput
                 inputTitle={'No of Medicine Available'}
-                container_style={{width: '100%'}}
+                container_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={zerotoone}
                 onValue={val => setZerotoone(val)}
               />
               {/* </View> */}
-             
-            
+
+
               <Text
                 style={[
                   font_style.text_14_700,
-                  {color: Colors.black, paddingVertical: 5, marginBottom: 10},
+                  { color: Colors.black, paddingVertical: 5, marginBottom: 10 },
                 ]}>
                 {'Services Available'}
-                <Text style={[font_style.text_14_700, {color: Colors.red}]}>
+                <Text style={[font_style.text_14_700, { color: Colors.red }]}>
                   {' *'}
                 </Text>
               </Text>
@@ -713,13 +720,13 @@ const EditFacility = props => {
                 righticon={ImageAssets.down}
               />
             )}
-             <CustomInput
-                inputTitle={'Daily Average OPD'}
-                container_style={{width: '100%'}}
-                keyboardType={KeyBoardType.number_pad}
-                value={dailyAvgOPD}
-                onValue={val => setDailyAvgOPD(val)}
-              />
+            <CustomInput
+              inputTitle={'Daily Average OPD'}
+              container_style={{ width: '100%' }}
+              keyboardType={KeyBoardType.number_pad}
+              value={dailyAvgOPD}
+              onValue={val => setDailyAvgOPD(val)}
+            />
             {/* <Text
               style={[
                 font_style.text_14_700,
@@ -747,10 +754,10 @@ const EditFacility = props => {
                 setImageUrl2('');
               }}
             /> */}
-            <View style={{marginBottom: 40}}>
+            <View style={{ marginBottom: 40 }}>
               <MyButton
                 btnText={'Update'}
-                btnstyle={{width: '40%'}}
+                btnstyle={{ width: '40%' }}
                 onPress={() => handleUpdate()}
               />
             </View>
@@ -833,7 +840,7 @@ const EditFacility = props => {
         />
       )}
 
-       {showAam && (
+      {showAam && (
         <MyDialog
           children={
             <DropDownAdapter
@@ -850,10 +857,10 @@ const EditFacility = props => {
           }
         />
       )}
-      
+
     </Container>
   );
 };
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 export default EditFacility;
