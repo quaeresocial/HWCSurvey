@@ -64,16 +64,14 @@ const CustomInput = props => {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-          <TextInput
+         <TextInput
             value={props.value}
             numberOfLines={props.numberOfLines}
             returnKeyType={props.returnKeyType ? props.returnKeyType : 'next'}
             multiline={props.multiline}
             maxLength={props?.maxLength}
             placeholderTextColor={
-              props.placeholderTextColor
-                ? props.placeholderTextColor
-                : Colors.grey
+              props.placeholderTextColor ? props.placeholderTextColor : Colors.grey
             }
             style={[
               font_style.text_14_600,
@@ -83,15 +81,22 @@ const CustomInput = props => {
                 color: Colors.darkGray,
               },
               props.textcolor,
-              ,
               props?.textInputStyle,
             ]}
             editable={props.editable}
             placeholder={props.placeholder}
             keyboardType={props?.keyboardType ? props?.keyboardType : 'default'}
-            underlineColorAndroid='transparent'
+            underlineColorAndroid="transparent"
             onChangeText={text => {
-              props?.onValue(text)
+              let filteredText = text
+
+              // ✅ If keyboardType is number-pad, allow only digits
+              if (props?.keyboardType === 'number-pad') {
+                console.log("aya", props?.keyboardType)
+                filteredText = text.replace(/[^0-9]/g, '')
+              }
+
+              props?.onValue(filteredText)
             }}
             {...props}
           />

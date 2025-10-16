@@ -15,7 +15,7 @@ import ImageAssets from '../common/ImageAssets';
 
 const CustomUpload = props => {
   return (
-    <View style={{marginVertical: 15}}>
+    <View style={{marginVertical: 15, width:width-32}}>
       {props.image == '' && (
         <Pressable
           onPress={props.onPress}

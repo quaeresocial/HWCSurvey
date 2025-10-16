@@ -1,17 +1,39 @@
 import {
   FlatList,
+  Text,
+  View,
 } from 'react-native'
 import NoData from '../../coomon_component/NoData'
 import MyRadioButton from '../../coomon_component/RadioButton'
+import { font_style } from '../../common/MyStyles'
+import Colors from '../../common/Colors'
 
 const Adapter = props => {
-  const render_item = ({item}) => {
+  const render_item = ({ item }) => {
     return (
-      <MyRadioButton
-        text={item?.ServiceName}
-        onPress={() => props.onPress(item)}
-        isChecked={item?.Ischecked == "0" ? false : true}
-      />
+      <View>
+        <Text
+          style={[
+            font_style.text_14_700,
+            { color: Colors.black, paddingBottom: 6 },
+          ]}>
+          {item?.ServiceName}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MyRadioButton
+            textStyle={[font_style.text_14_600, { color: Colors.black }]}
+            text={'Yes'}
+            onPress={() => props.onPress(item, "Yes")}
+            isChecked={item?.Ischecked == "1" }
+          />
+          <MyRadioButton
+            textStyle={[font_style.text_14_600, { color: Colors.black }]}
+            text={'No'}
+            onPress={() => props.onPress(item, "No")}
+            isChecked={item?.Ischecked == "2" }
+          />
+        </View>
+      </View>
     )
   }
 

@@ -124,9 +124,9 @@ const EditFacility = props => {
           const foundData = res?.HWCSeriveTypeList.find(
             item => item?.Pk_ServiceId === 2,
           );
-          if (foundData?.Ischecked == 0) {
+          if (foundData?.Ischecked == 2) {
             setSelecetd('');
-          } else {
+          } else if (foundData?.Ischecked == 1) {
             setSelecetd(foundData?.ServiceName);
           }
           dispatch(setLoading(false));
@@ -195,48 +195,49 @@ const EditFacility = props => {
   }, [hwcid]);
 
   const handleUpdate = () => {
-     if (scType == "" || scType == null) {
+    if (scType == "" || scType == null) {
       showToast('Select Type Of Facility');
-    }else
-    if (!isValidName(aamName)) {
+    } else if (isEmpty(nin)) {
+      showToast('Enter NIN');
+    } else if (/^0+$/.test(nin)) {
+      showToast('NIN cannot be zeros');
+    } else if (!/^[0-9]\d{9,14}$/.test(nin)) {
+      showToast('NIN must be between 10 and 15 digits');
+    } else if (!isValidName(aamName)) {
       showToast('Select Type Of AAM Infrastructure');
     } else if (choType == "" || choType == null) {
       showToast('Select Is CHO Posted');
     } else if (!isValidName(choname) && choType === "Yes") {
-        showToast('Enter CHO Name');
-      } else if (!isValidIndianMobileNumber(chomobile) && choType === "Yes") {
-        showToast('Enter valid CHO mobile number');
-      } else if (!isValidName(anmname)) {
-        showToast('Enter ANM Name');
-      } else if (!isValidIndianMobileNumber(anmmobile)) {
-        showToast('Enter valid ANM mobile number');
-      } else if (isEmpty(village)) {
-        showToast('Select Village');
-      } else if (isEmpty(totalpopulation)) {
-        showToast('Enter total population');
-      } else if (isEmpty(anm)) {
-        showToast('Enter Asha Count');
-      } else if (isEmpty(noofschool)) {
-        showToast('Enter no. of School');
-      } else if (isEmpty(eligiblecouple)) {
-        showToast('Enter AWW');
-      } else if (isEmpty(pregnentwomen)) {
-        showToast('Enter Diagnostic Test Available');
-      } else if (isEmpty(zerotoone)) {
-        showToast('No. of Medicine Available');
-      } else if (isEmpty(nin)) {
-        showToast('Enter NIN');
-      } else if (/^0+$/.test(nin)) {
-        showToast('NIN cannot be zeros');
-      } else if (!/^[0-9]\d{9,14}$/.test(nin)) {
-        showToast('NIN must be between 10 and 15 digits');
-      } else {
-        handleValidation();
-      }
+      showToast('Enter CHO Name');
+    } else if (!isValidIndianMobileNumber(chomobile) && choType === "Yes") {
+      showToast('Enter valid CHO mobile number');
+    } else if (!isValidName(anmname)) {
+      showToast('Enter ANM Name');
+    } else if (!isValidIndianMobileNumber(anmmobile)) {
+      showToast('Enter valid ANM mobile number');
+    } else if (isEmpty(village)) {
+      showToast('Select Village');
+    } else if (isEmpty(totalpopulation)) {
+      showToast('Enter total population');
+    } else if (isEmpty(anm)) {
+      showToast('Enter Asha Count');
+    }else if (isEmpty(eligiblecouple)) {
+      showToast('Enter AWW');
+    }  else if (isEmpty(noofschool)) {
+      showToast('Enter no. of School');
+    } else if (isEmpty(pregnentwomen)) {
+      showToast('Enter Diagnostic Test Available');
+    } else if (isEmpty(zerotoone)) {
+      showToast('No. of Medicine Available');
+    } else if (isEmpty(dailyAvgOPD)) {
+      showToast('Enter Daily Average OPD');
+    } else {
+      handleValidation();
+    }
   };
 
   const validateCheckedServices = () => {
-    const anyChecked = servicelist.some(item => item.Ischecked === 1);
+    const anyChecked = servicelist.every(item => item.Ischecked == 1 || item.Ischecked == 2);
     return anyChecked;
   };
 
@@ -265,24 +266,24 @@ const EditFacility = props => {
   };
 
   const imgValidate = () => {
-    // if (isEmpty(imageurl1)) {
-    //   showToast('Please upload image clear name with branding');
-    // } else if (isEmpty(imageurl2)) {
-    //   showToast('Please upload image service delivery');
-    // } else {
-    imageValidate();
-    // }
+    if (isEmpty(imageurl1)) {
+      showToast('Please upload Photo of Front of The Building With The Name of AAM.');
+    } else if (isEmpty(imageurl2)) {
+      showToast('Please upload Photo of The CHO Room Where CHO is Providing Services.');
+    } else {
+      imageValidate();
+    }
   };
 
   const imageValidate = () => {
     const data = [];
     servicelist.map(item => {
-      if (item?.Ischecked == '1') {
         const obj = {
+         Ischecked: item?.Ischecked ,
           Pk_serviceId: item?.Pk_ServiceId,
-        };
+        }
         data.push(obj);
-      }
+      
     });
     let param = {
       Fk_FacilityId: value?.FK_FacilityCode,
@@ -312,8 +313,6 @@ const EditFacility = props => {
       IsCHO: choType,
     };
 
-    console.log(param, '=======================>>>>');
-
     dispatch(setLoading(true));
     updateserviceDetail(
       param,
@@ -335,7 +334,7 @@ const EditFacility = props => {
               },
             ]
           );
-          
+
           dispatch(setLoading(false));
         } else {
           showToast(res?.message);
@@ -447,19 +446,19 @@ const EditFacility = props => {
     );
   };
 
-  const handleService = value => {
+  const handleService = (value, type) => {
     const updatedServices = servicelist.map(item =>
       item.Pk_ServiceId === value?.Pk_ServiceId
-        ? { ...item, Ischecked: item.Ischecked === 0 ? 1 : 0 }
+        ? { ...item, Ischecked: type == 'Yes' ? 1 : 2 }
         : item,
     );
     setServiceList(updatedServices);
     const foundData = updatedServices.find(item => item?.Pk_ServiceId === 2);
-    if (foundData?.Ischecked == 0) {
+    if (foundData?.Ischecked == 2 && type == "No") {
       setSelecetd('');
       setHwcName('');
       setHwcId(0);
-    } else {
+    } else if (foundData?.Ischecked == 1 && type == "Yes"){
       setSelecetd(foundData?.ServiceName);
     }
   };
@@ -614,8 +613,8 @@ const EditFacility = props => {
                 keyboardType={KeyBoardType.default}
                 value={choname}
                 onValue={val => {
-                  const regex = val.replace(/[^a-zA-Z]/g, '');
-                  setChoName(regex);
+                  const filtered = val.replace(/[^a-zA-Z\s]/g, '');
+                  setChoName(filtered);
                 }}
               />}
               {choType === "Yes" && <CustomInput
@@ -632,8 +631,8 @@ const EditFacility = props => {
                 keyboardType={KeyBoardType.default}
                 value={anmname}
                 onValue={val => {
-                  const regex = val.replace(/[^a-zA-Z]/g, '');
-                  setAnmName(regex);
+                  const filtered = val.replace(/[^a-zA-Z\s]/g, '');
+                  setAnmName(filtered);
                 }}
               />
               <CustomInput
@@ -655,6 +654,7 @@ const EditFacility = props => {
                   container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={totalpopulation}
+                  maxLength={5}
                   onValue={val => setTotalPopulation(val)}
                 />
 
@@ -663,6 +663,7 @@ const EditFacility = props => {
                   container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={anm}
+                  maxLength={2}
                   onValue={val => setAnm(val)}
                 />
               </View>
@@ -677,12 +678,14 @@ const EditFacility = props => {
                   container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
                   value={eligiblecouple}
+                  maxLength={2}
                   onValue={val => setEligibleCouple(val)}
                 />
                 <CustomInput
                   inputTitle={'No. of Schools'}
                   container_style={{ width: width / 2 - 20 }}
                   keyboardType={KeyBoardType.number_pad}
+                  maxLength={1}
                   value={noofschool}
                   onValue={val => setNoofschool(val)}
                 />
@@ -693,8 +696,16 @@ const EditFacility = props => {
                 inputTitle={'No of Diagnostic Test Available'}
                 container_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
+                maxLength={2}
                 value={pregnentwomen}
-                onValue={val => setPregnentwomen(val)}
+                onValue={val => {
+                  if (parseInt(val) < 15)
+                    setPregnentwomen(val)
+                  else {
+                    setPregnentwomen('')
+                    showToast("Cannot be more than 14")
+                  }
+                }}
               />
 
               <CustomInput
@@ -702,11 +713,16 @@ const EditFacility = props => {
                 container_style={{ width: '100%' }}
                 keyboardType={KeyBoardType.number_pad}
                 value={zerotoone}
-                onValue={val => setZerotoone(val)}
+                onValue={val => {
+                  if (parseInt(val) < 85)
+                    setZerotoone(val)
+                  else {
+                    setZerotoone('')
+                    showToast("Cannot be more than 85")
+                  }
+                }}
               />
               {/* </View> */}
-
-
               <Text
                 style={[
                   font_style.text_14_700,
@@ -719,7 +735,7 @@ const EditFacility = props => {
               </Text>
               <Adapter
                 data={servicelist}
-                onPress={item => handleService(item)}
+                onPress={(item, type) => handleService(item, type)}
               />
             </View>
             {selecetd == 'Availability of Water Supply' && (
@@ -736,17 +752,18 @@ const EditFacility = props => {
               container_style={{ width: '100%' }}
               keyboardType={KeyBoardType.number_pad}
               value={dailyAvgOPD}
+              maxLength={3}
               onValue={val => setDailyAvgOPD(val)}
             />
-            {/* <Text
+            <Text
               style={[
                 font_style.text_14_700,
-                {color: Colors.black, paddingVertical: 5},
+                { color: Colors.black, paddingVertical: 5 },
               ]}>
               {'Facility Image Upload'}
             </Text>
             <CustomUpload
-              title={'Clear name and branding'}
+              title={'Front of The Building With The Name of AAM.'}
               required={' *'}
               icon={ImageAssets.uploadicon}
               onPress={() => setFilePicker1(true)}
@@ -756,7 +773,7 @@ const EditFacility = props => {
               }}
             />
             <CustomUpload
-              title={'Service delivery'}
+              title={'Photo of The CHO Room Where CHO is Providing Services.'}
               required={' *'}
               icon={ImageAssets.uploadicon}
               onPress={() => setFilePicker2(true)}
@@ -764,7 +781,7 @@ const EditFacility = props => {
               Clear={() => {
                 setImageUrl2('');
               }}
-            /> */}
+            />
             <View style={{ marginBottom: 40 }}>
               <MyButton
                 btnText={'Update'}
@@ -777,7 +794,7 @@ const EditFacility = props => {
       </ScrollView>
       <MyImageFilePicker
         isFile={false}
-        onlyCamera={false}
+        onlyCamera={true}
         isUploadPhotoModal={filePicker1}
         closePicker={() => setFilePicker1(false)}
         setImage={imageRes => {
@@ -787,7 +804,7 @@ const EditFacility = props => {
       />
       <MyImageFilePicker
         isFile={false}
-        onlyCamera={false}
+        onlyCamera={true}
         isUploadPhotoModal={filePicker2}
         closePicker={() => setFilePicker2(false)}
         setImage={imageRes => {
