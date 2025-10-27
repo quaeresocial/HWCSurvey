@@ -56,6 +56,11 @@ export function isValidName(name) {
 }
 
 export function isValidIndianMobileNumber(number) {
+  // Check if number is blank or null
+  if (!number || number.trim() === '') {
+    return false;
+  }
+
   // Remove spaces and country code if present
   const cleaned = number.trim().replace(/^(\+91[\-\s]?|0)/, '');
 
@@ -67,7 +72,6 @@ export function isValidIndianMobileNumber(number) {
 
   return re.test(cleaned) && !allSameDigits.test(cleaned);
 }
-
 
 
 export function openUrl (url) {
